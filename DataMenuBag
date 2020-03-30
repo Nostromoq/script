@@ -1,0 +1,82 @@
+forward DataBagMenu(playerid, bagid, bagmodel, listitem);
+
+public DataBagMenu(playerid, bagid, bagmodel, listitem)
+{
+	new rows,
+		fields,
+		string[144],
+		size;
+
+    cache_get_data(rows, fields);
+
+	new obj = cache_get_field_content_int(0, "Model");
+	new info = cache_get_field_content_int(0, "Info");
+
+	size += ReturnObjectSize(obj, info);
+
+	if(listitem == 0)
+	{
+	    if(IsPlayerInAnyVehicle(playerid))
+			return 1;
+
+	    new Float:x,
+			Float:y,
+			Float:z,
+			Float:distance_1 = 999.9,
+			array = -1;
+
+		GetPlayerPos(playerid, x, y, z);
+		new world = GetPlayerVirtualWorld(playerid);
+
+		new Float:actorX,
+			Float:actorY,
+			Float:actorZ;
+
+		for(new a = sizeof(PNJInfos); a < MAX_ACTORS; a++)
+		{
+			if(IsValidActor(a))
+			{
+				GetActorPos(a, actorX, actorY, actorZ);
+				new Float:distance_2 = GetDistancePointToPoint(actorX, actorY, actorZ, x, y, z);
+				if(distance_2 <= 2.0 && distance_2 < distance_1 && world == GetActorVirtualWorld(a))
+				{
+					distance_1 = distance_2;
+					array = a;
+					break;
+				}
+			}
+		}
+
+		if(array > -1)
+		{
+			if(size+35 > GetBagSize(bagmodel)*10)
+			{
+			    format(string, sizeof(string), "Impossible de poser ce cadavre, pas assez de place dans le sac (%.1f/%d).", float(size)/10, GetBagSize(bagmodel));
+			    return SendClientMessage(playerid, COLOR_RED, string);
+			}
+			format(string, sizeof(string), "INSERT INTO `bags` SET IDSac = %d, Model = %d, Info = 0", bagid, Id_Actor[array]);
+			mysql_tquery(g_Handle, string, "SendQuery", "");
+
+			SendClientMessage(playerid, COLOR_LIGHTBLUE, "Vous avez déposé un cadavre dans le sac.");
+
+			format(string, sizeof(string), "[SAC]    %s dépose un cadavre dans le sac %d", gUsername[playerid], bagid);
+			WriteLogSac(string);
+
+			SetPlayerChatBubble(playerid, "* dépose quelque chose dans le sac", COLOR_PURPLE, 20.0, 5000);
+
+			format(string, sizeof(string), "UPDATE `corps` SET Etat=1 WHERE Cid=%d", Id_Actor[array]);
+			mysql_tquery(g_Handle, string, "SendQuery", "");
+
+            Etat_Actor[array] = 1;
+           	Id_Actor[array] = -1;
+           	Skin_Actor[array] = 0;
+
+           	DestroyActor(array);
+		}
+		else
+		{
+		    SendClientMessage(playerid, COLOR_RED, "Vous n'êtes pas à côté d'un corps.");
+		}
+	}
+	return 1;
+}
