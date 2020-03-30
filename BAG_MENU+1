@@ -1,0 +1,70 @@
+ else if(dialogid == BAG_MENU+1)
+    {
+        if(response)
+        {
+            new bagid = MenuItems[playerid][0], bagmodel;
+            if(bagid == SpineInfo[playerid] && Accessory[playerid][3][aModel] != 0) bagmodel = Accessory[playerid][3][aModel];
+            else for(new i; i < sizeof(ObjectRoleplay); i++)
+            {
+                if(ObjectRoleplay[i][oObject] > 0 && IsABag(ObjectRoleplay[i][oObjModel]) > 0 && ObjectRoleplay[i][oObjInfo] == bagid)
+                {
+                    new Float:x, Float:y, Float:z;
+                    GetPlayerPos(playerid, x, y, z);
+                    if(GetDistancePointToPoint(ObjectRoleplay[i][oPosX], ObjectRoleplay[i][oPosY], ObjectRoleplay[i][oPosZ], x, y, z) > 2.0)
+                        return SendClientMessage(playerid, COLOR_LIGHTBLUE, "Vous n'êtes plus à proximité de ce sac ou il a été ramassé.");
+                    bagmodel = ObjectRoleplay[i][oObjModel];
+                    break;
+                }
+            }
+
+            format(query, sizeof(query), "SELECT Model, Info FROM `bags` WHERE IDSac = %d", bagid);
+            mysql_tquery(g_Handle, query, "DataBagMenu", "iiii", playerid, bagid, bagmodel, listitem); 
+            //return 1;
+            if(listitem == 0)
+                {
+                    if(GetPlayerWeapon(playerid) == 0)
+                        return SendClientMessage(playerid, COLOR_RED, "Aucune arme en mains.");
+
+                    new slot = -1;
+                    slot = GetWeaponSlot(GetPlayerWeapon(playerid));
+
+                    if(gWeapon[playerid][slot] > 0 && IsWeapon(gWeapon[playerid][slot]) > 0)
+                    {
+                        if(ReturnObjectSize(IsWeapon(gWeapon[playerid][slot])) == 0)
+                        {
+                            return SendClientMessage(playerid, COLOR_RED, "Impossible de mettre cette arme (taille non définie).");
+                        }
+
+                        format(query, sizeof(query), "SELECT Model, Info FROM `bags` WHERE IDSac = %d", bagid);
+                        mysql_tquery(g_Handle, query, "DataBagMenu", "iiii", playerid, bagid, bagmodel, listitem);
+                        return 1;
+                    }
+                    else
+                    {
+                        SendClientMessage(playerid, COLOR_RED, "Vous n'avez pas d'arme dans les mains.");
+                    }
+                }
+                else //if(listitem == 1)
+                {
+                    new obj = MainObj[playerid];
+
+                    if(obj > 0)
+                    {
+                        if(ReturnObjectSize(obj) == 0)
+                        {
+                            return SendClientMessage(playerid, COLOR_RED, "Impossible de mettre cet objet (taille non définie).");
+                        }
+
+
+                        format(query, sizeof(query), "SELECT Model, Info FROM `bags` WHERE IDSac = %d", bagid);
+                        mysql_tquery(g_Handle, query, "DataBagMenu", "iiii", playerid, bagid, bagmodel, listitem);
+                        return 1;
+                    }
+                    else
+                    {
+                        SendClientMessage(playerid, COLOR_RED, "Vous n'avez pas d'objet dans les mains.");
+                    }
+                }
+        }
+        return 1;
+    }
