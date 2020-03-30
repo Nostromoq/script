@@ -1,0 +1,89 @@
+ if(!strcmp(tmp, "deposer", true))
+        {
+            //for(new slot = 0; slot < 13; slot++)
+            //{
+
+            
+
+            new slot = -1;
+            //slot = GetWeaponSlot(GetPlayerWeapon(playerid));
+
+            if(GetPlayerWeapon(playerid) != 0)
+                {
+                    slot = GetWeaponSlot(GetPlayerWeapon(playerid));
+                }
+
+
+            new gun,
+                ammo;
+            GetPlayerWeaponData(playerid, slot, gun, ammo);
+            
+            if(!MainObj[playerid] && !gun)// || !GetPlayerAmmo(playerid)))
+                return SendClientMessage(playerid, COLOR_RED, "Vous n'avez rien en main. (objet/arme)");
+            new obj = -1, Float:distance = 999.9;
+            new Float:x, Float:y, Float:z, world = GetPlayerVirtualWorld(playerid);
+            GetPlayerPos(playerid, x, y, z);
+            for(new i; i < sizeof(ObjectRoleplay); i++)
+            {
+                if(ObjectRoleplay[i][oObject] > 0 && IsABag(ObjectRoleplay[i][oObjModel]) > 0 && ObjectRoleplay[i][oObjInfo] > 0)
+                {
+                    new Float:distance2 = GetDistancePointToPoint(ObjectRoleplay[i][oPosX], ObjectRoleplay[i][oPosY], ObjectRoleplay[i][oPosZ], x, y, z);
+                    if(distance2 <= 2.0 && distance2 < distance && world == ObjectRoleplay[i][oWorld]) {distance = distance2; obj = i;}
+                }
+            }
+            if(obj > -1 || SpineInfo[playerid] != 0 && Accessory[playerid][3][aModel] != 0)
+            {
+                // format(query, sizeof(query), "SELECT COUNT(*) FROM `bags` WHERE IDSac = %d", ObjectRoleplay[obj][oObjInfo]);
+                // mysql_query(query); mysql_store_result();
+                
+                // if(mysql_fetch_int() == 12) return SendClientMessage(playerid, COLOR_LIGHTBLUE, "Il y ne peut y avoir plus de 12 objets dans un sac.");
+
+                
+                
+                    new arme[64], objet[64];
+
+
+                    if(slot > -1 && gWeapon[playerid][slot] > 0 && IsWeapon(gWeapon[playerid][slot]) > 0 && GetWeaponSlot(IsWeapon(gWeapon[playerid][slot])) > -1)
+                    {
+                        format(arme, sizeof(arme), "%s", ReturnObjectName(gWeapon[playerid][slot], gAmmo[playerid][slot]));
+                    }
+                    else
+                        arme = "Aucune";
+
+                    if(MainObj[playerid] > 0)
+                        format(objet, sizeof(objet), "%s", ReturnObjectName(MainObj[playerid], MainInfo[playerid]));
+                    else
+                        objet = "Aucun";
+
+
+                    //if(GetWeaponSlot(gun) != -1) {format(arme, sizeof(arme), "%s", ReturnObjectName(gun, ammo));} //GetPlayerAmmoInWeapon(playerid, gun)
+                    //else {arme = "Aucune";}
+                    //if(MainObj[playerid] > 0) {format(objet, sizeof(objet), "%s", ReturnObjectName(MainObj[playerid], MainInfo[playerid]));}
+                    //else  {objet = "Aucun";}
+                    format(string, sizeof(string), "Déposer une arme (%s)\nDéposer l'objet (%s)", arme, objet);
+                    ShowPlayerDialog(playerid, BAG_MENU+1, DIALOG_STYLE_LIST, "Sac", string, "Sélectionner", "Fermer");
+                    //if(obj > -1)
+                    //{
+                      //  MenuItems[playerid][0] = ObjectRoleplay[obj][oObjInfo];
+                        //return ShowPlayerDialog(playerid, BAG_MENU+1, DIALOG_STYLE_LIST, ReturnObjectName(ObjectRoleplay[obj][oObjModel], 0), string, "Sélectionner", "Fermer");
+                    //}
+                    //else
+                    //{
+                      //  MenuItems[playerid][0] = SpineInfo[playerid];
+                        //return ShowPlayerDialog(playerid, BAG_MENU+1, DIALOG_STYLE_LIST, ReturnObjectName(Accessory[playerid][3][aModel], 0), string, "Sélectionner", "Fermer");
+                    //}
+
+                
+            }
+
+        }
+
+
+		else
+		{
+			SendClientMessage(playerid, -1, "Commande: {AFAFAF}/sac [Option]");
+			return SendClientMessage(playerid, COLOR_USAGE, "Options disponibles: voir, deposer");
+		}
+        
+        return 1;
+    }
